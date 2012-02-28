@@ -1,0 +1,34 @@
+{
+    "name": "tf2op_alert", 
+    "license": "MPL 1.1/GPL 2.0/LGPL 2.1", 
+    "author": "Hannes Walter", 
+    "version": "0.1.1", 
+	"bugs": "mailto:b.findteisen@googlemail.com",
+    "fullName": "TF2OP Alert!", 
+    "id": "jid1-uaB4e0zZ4PWikg", 
+    "description": "Displays new messages from TF2OP.",
+	"preferences": [{
+        "name": "updateRate",
+        "title": "Update rate in minutes.",
+        "type": "integer",
+        "value": 5
+    },
+	{
+        "name": "showAllNotifications",
+        "title": "Display notification for every message?",
+        "type": "bool",
+        "value": true
+    },
+	{
+        "name": "notificationTime",
+        "title": "How long the notification should be displayed (in seconds).",
+        "type": "integer",
+        "value": 5
+    },
+	{
+        "name": "showJustOneNotification",
+        "title": "Show just one notification if new messages arrived.",
+        "type": "bool",
+        "value": false
+    }]
+}
