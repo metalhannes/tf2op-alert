@@ -1,11 +1,49 @@
 function createNotification(message, notificationTime) {
     //Set up first
-	if(document.getElementById("notificationContainer") == null) {
+	if(document.getElementById("tf2op-alert-notificationContainer") == null) {
+		//Add CSS Rules
+		document.getElementsByTagName("head")[0].appendChild(
+			createHTMLElement("style", {
+				"type":		"text/css",
+				"rel":		"stylesheet",
+				"media":	"screen",
+				"title":	"dynamicSheet"
+			}));
+		var css = document.styleSheets[document.styleSheets.length - 1];
+		css.insertRule("#tf2op-alert-notificationContainer { "+
+			"position: fixed;" +
+			"bottom: 10px;" +
+			"right: 10px;" +
+			"width: 350px;" +
+			"z-index:100;}",0);
+		css.insertRule(".tf2op-alert-notification {" + 
+			"background: #3B342F;" +
+			"border: 6px solid #3B342F;" +
+			"border-radius: 6px;" +
+			"color: #695F57;" +
+			"padding: 8px;" +
+			"font-family: \"Helvetica Neue\", Helvetica, Arial;" +
+			"font-size: 10px;" +
+			"margin: 0 0 10px 0;" +
+			"opacity: 0;" +
+			"position: relative;" +
+			"right: 20px;" +
+			"bottom: 0px;" +
+			"z-index:101;" +
+			"width: 350px;" +
+			"padding: 10px 5px;" +
+			"display: none;}",1);
+		css.insertRule(".tf2op-alert-notification-title , .tf2op-alert-notification-title a {" + 
+			"font-size: 12px;" + 
+			"font-weight:bold;}",2);
+		css.insertRule(".tf2op-alert-notification a {" +
+			"color: #FFFFFF;" +
+			"text-decoration: none;}",3);
+		css.insertRule(".tf2op-alert-notification a:hover { color: #CCCCCC}",3);
+		
 		//Create container-div
-		var notificationContainer = document.createElement("div");
-		notificationContainer.setAttribute("id","notificationContainer");
-		notificationContainer.setAttribute("style","position: fixed;bottom: 10px;right: 10px;width: 350px;z-index:100;");
-		document.getElementsByTagName("body")[0].appendChild(notificationContainer);
+		document.getElementsByTagName("body")[0].appendChild(createHTMLElement("div", {"id": "tf2op-alert-notificationContainer",}));
+
 	}
 	
 	//Set up the text
@@ -13,47 +51,46 @@ function createNotification(message, notificationTime) {
 		var text = " has offered:";
 	else
 		var text = " has replied:";
-		
-	var notification	=	createHTMLElement("div",{
-								"style": "background: #3b342f;border: 6px solid #3b342f;border-radius: 6px;-moz-border-radius: 6px;-webkit-border-radius: 6px;color: #695f57;padding: 8px;font-family: \"Helvetica Neue\", Helvetica, Arial, Geneva, sans-serif;font-size: 10px;margin: 0 0 10px 0;-webkit-font-smoothing: antialiased;opacity: 0;position: relative;right: 10px;bottom: 10px;z-index:101;width: 350px;padding: 10px 5px;display: none;"
+	
+	//Create the notification
+	var notification	=	createHTMLElement("div", {								//Main div for notification.
+								"class":	"tf2op-alert-notification"
 							},[
-								createHTMLElement("div",{
-									"style": ""
+								createHTMLElement("div", {							//Set the title.
+									"class":	"tf2op-alert-notification-title"
 								},[
-									createHTMLElement("a",{
-										"href": message.traderProfile,
-										"style": "font-weight: bold;color: #FFFFFF;text-decoration: none;",
-										"target": "_blank"
+									createHTMLElement("a", {						//Link to the traders profile.
+										"href":		message.traderProfile,
+										"target":	"_blank"
 									},[
-										document.createTextNode(message.traderName)
+										document.createTextNode(message.traderName)	//The traders name.
 									]),
-									document.createTextNode(text)
+									document.createTextNode(text),					//"has offered" or "has replied"
 								]),
-								createHTMLElement("a",{
-									"href": message.messageLink,
-									"style": "color: #FFFFFF;text-decoration: none;",
-									"target": "_blank"
-								},[
-									document.createTextNode(message.messageText)
-								])
+								createHTMLElement("a", {							//Link to the post on tf2op.
+										"href":		message.messageLink,
+										"target":	"_blank"
+									},[
+										document.createTextNode(message.messageText)//The message itself.
+									])
 							]);
-					
-	//Display it
-	displayNotification(notification, notificationTime);
+		
+	//Append to the document.
+	document.getElementById("tf2op-alert-notificationContainer").appendChild(notification);
+	//Make clicking the message remove it from the panel.
+	notification.childNodes[1].onclick = function(){ self.port.emit("removeMessage",message.id); };
+	//Display it.
+	notification.style.display = "block";
+	fadeIn(notification, 0.05);
+	//Remove it.
+	window.setTimeout(function() { fadeOut(notification,0.85); }, notificationTime*1000);
+	
 }
 
-function displayNotification(notification, notificationTime) {
-	document.getElementById("notificationContainer").appendChild(notification);
-	notification.style.display = "block";
-	fadeIn(notification, 0.05, notificationTime);
-}
-	
-function fadeIn(notification, opacity, notificationTime) {
+function fadeIn(notification, opacity) {
 	notification.style.opacity = opacity;
 	if(opacity < 0.9)
-		window.setTimeout(function() { fadeIn(notification, opacity + 0.05, notificationTime);},50);
-	else
-		window.setTimeout(function() { fadeOut(notification,opacity); }, notificationTime*1000);
+		window.setTimeout(function() { fadeIn(notification, opacity + 0.05);},50);
 }
 
 function fadeOut(notification,opacity) {
@@ -61,7 +98,7 @@ function fadeOut(notification,opacity) {
 	if(opacity > 0)
 		window.setTimeout(function() { fadeOut(notification,opacity - 0.05); },50);
 	else
-		document.getElementById("notificationContainer").removeChild(notification);
+		document.getElementById("tf2op-alert-notificationContainer").removeChild(notification);
 }
 
 function createHTMLElement(tag, attributes, childNodes) {
@@ -82,5 +119,3 @@ function createHTMLElement(tag, attributes, childNodes) {
 	
 	return element;
 }
-
-self.port.on("createNotification",createNotification)

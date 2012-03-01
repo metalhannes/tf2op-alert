@@ -26,6 +26,11 @@
 				text-decoration: none;
 			}
 			
+			a:hover {
+				color: #CCCCCC;
+				cursor:pointer;
+			}
+			
 			#navBar a:hover {
 				color: #FF7017;
 			}
@@ -42,7 +47,6 @@
 				display: inline;
 			}
 		</style>
-		<script type="text/javascript" src="messages.js"></script>
 	</head>
 	<body>
 		<ul id="navBar">
@@ -50,25 +54,18 @@
 				<li><a href="http://www.tf2outpost.com/" target="_blank" style="color:#FF7017;">Home</a></li>
 				<li><a href="http://www.tf2outpost.com/trades" target="_blank">My Trades</a></li>
 				<li><a href="http://www.tf2outpost.com/offers" target="_blank">My Offers</a></li>
+				<li><a style="float: right" name="updateLink">Refresh</a></li>
 			</div>
 			<div id="navLoggedOut" style="display: none;">
 				<li><a href="http://www.tf2outpost.com/" target="_blank" style="color:#FF7017;">Home</a></li>
 				<li><a href="http://www.tf2outpost.com/login" target="_blank">Login</a></li>
+				<li><a style="float: right" name="updateLink">Refresh</a></li>
 			</div>
 		</ul>
 		<div id="allMessages">
-			<div id="noMessages" class="messageBox">
+			<div id="addonMessage" class="messageBox">
 				No new messages.
 			</div>
 		</div>
-		<script type="text/javascript">
-			createMessage ({
-							type: "offer",
-							traderProfile: "google.de",
-							traderName: "MyName",
-							messageLink: "google.de",
-							messageText: "This is a test message."
-						});
-		</script>
 	</body>
 </html>

@@ -1,23 +1,3 @@
-function destroyMessages(newMessagesIncoming) {
-    var allMessages	= document.getElementById("allMessages")
-	var messages	= document.getElementsByName("message");
-
-	for each( var message in messages)
-		allMessages.removeChild(message);
-	
-	if(newMessagesIncoming && document.getElementById("noMessages") != null) {
-		allMessages.removeChild(document.getElementById("noMessages"));
-	} else if (document.getElementById("noMessages") == null) {
-		allMessages.appendChild(createHTMLElement(
-			"div",{
-				"id": "noMessages",
-				"class": "messageBox"
-			},[
-				document.createTextNode("No new messages.")
-			]));
-	}
-}
-
 function createMessage(message) {
 
 	if(message.type == "offer")
@@ -26,38 +6,68 @@ function createMessage(message) {
 		var text = " has replied:";
 
 	//Display the box
-	document.getElementById("allMessages").appendChild(createHTMLElement("div",{
-			"name": "message",
-			"class": "messageBox"
+	document.getElementById("allMessages").appendChild(
+		createHTMLElement("div",{
+			"name":		"message",
+			"class":	"messageBox",
+			"id":		message.id
 		},[
 			createHTMLElement("div",{
 				"class": "messageTitle"
 			},[
 				createHTMLElement("a",{
-					"href": message.traderProfile,
-					"target": "_blank"
+					"href":		message.traderProfile,
+					"target":	"_blank"
 				},[
 					document.createTextNode(message.traderName)
 				]),
 				document.createTextNode(text)
 			]),
 			createHTMLElement("a",{
-				"href": message.messageLink,
-				"target": "_blank"
+				"href":		message.messageLink,
+				"onclick":	"removeMessage('" + message.id  + "');",
+				"target":	"_blank"
 			},[
 				document.createTextNode(message.messageText)
 			])
 		]));
 }
 
-function loggedIn() {
-	document.getElementById("navLoggedIn").style.display = "block";
-	document.getElementById("navLoggedOut").style.display = "none";
+function destroyMessages() {
+    var allMessages	= document.getElementById("allMessages");
+	for each( var message in allMessages.childNodes)
+		allMessages.removeChild(message);
 }
 
-function loggedOut() {
-	document.getElementById("navLoggedIn").style.display = "none";
-	document.getElementById("navLoggedOut").style.display = "block";
+function addonMessage(message) {
+	var allMessages		= document.getElementById("allMessages");
+	var addonMessage	= document.getElementById("addonMessage");
+	if(addonMessage)
+		allmessages.removeChild(addonMessage);
+	allMessages.appendChild(createHTMLElement(
+		"div",{
+			"id": "addonMessage",
+			"class": "messageBox"
+		},[
+			document.createTextNode(message)
+		]));
+}
+
+function removeMessage(messageId) {
+    var allMessages	= document.getElementById("allMessages");
+	allMessages.removeChild(document.getElementById(messageId));
+	if(document.getElementsByName("message").length < 1)
+		addonMessage("No new messages.");
+}
+
+function loggedInState(loggedIn) {
+	if(loggedIn) {
+		document.getElementById("navLoggedIn").style.display = "block";
+		document.getElementById("navLoggedOut").style.display = "none";
+	} else {
+		document.getElementById("navLoggedIn").style.display = "none";
+		document.getElementById("navLoggedOut").style.display = "block";
+	}
 }
 
 function createHTMLElement(tag, attributes, childNodes) {
@@ -79,7 +89,5 @@ function createHTMLElement(tag, attributes, childNodes) {
 	return element;
 }
 
-self.port.on("loggedIn",loggedIn);
-self.port.on("loggedOut",loggedOut);
-self.port.on("createMessage",createMessage)
-self.port.on("destroyMessages",destroyMessages)
+document.getElementsByName("updateLink")[0].onclick = function() {self.port.emit("Update");}
+document.getElementsByName("updateLink")[1].onclick = function() {self.port.emit("Update");}
