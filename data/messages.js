@@ -1,13 +1,18 @@
-function createMessage(message) {
+var messages			= [];
+var addonMessage;
+
+function displayMessage(message) {
+
+	var allMessages = document.getElementById("allMessages");
 
 	if(message.type == "offer")
 		var text = " has offered:";
 	else
 		var text = " has replied:";
 
-	//Display the box
-	document.getElementById("allMessages").appendChild(
-		createHTMLElement("div",{
+	//Not enough messages, create a new one.
+	if(messages.length == 0) {
+		var messageBox =	createHTMLElement("div",{
 			"name":		"message",
 			"class":	"messageBox",
 			"id":		message.id
@@ -24,40 +29,54 @@ function createMessage(message) {
 				document.createTextNode(text)
 			]),
 			createHTMLElement("a",{
-				"href":		message.messageLink,
-				"onclick":	"removeMessage('" + message.id  + "');",
+				"href":		"about:blank", //message.messageLink,
 				"target":	"_blank"
 			},[
 				document.createTextNode(message.messageText)
 			])
-		]));
+		]);
+		messageBox.childNodes[1].onclick = function(){removeMessage(this.parentNode.id);};
+		allMessages.appendChild(messageBox);
+	} else {
+		var messageBox = messages.pop();
+		messageBox.id = message.id;
+		messageBox.childNodes[0].childNodes[0].href	= message.traderProfile;
+		messageBox.childNodes[0].childNodes[0].childNodes[0].nodeValue = message.traderName;
+		messageBox.childNodes[0].childNodes[1].nodeValue = text;
+		messageBox.childNodes[1].href = message.messageLink;
+		messageBox.childNodes[1].childNodes[0].nodeValue = message.messageText;
+		allMessages.appendChild(messageBox);
+	}
+
+	//Resize Panel
+	resize();
 }
 
-function destroyMessages() {
-    var allMessages	= document.getElementById("allMessages");
-	for each( var message in allMessages.childNodes)
-		allMessages.removeChild(message);
+function removeAllMessages() {
+	var allMessages = document.getElementById("allMessages");
+	if(document.getElementById("addonMessage")) {
+		addonMessage = allMessages.removeChild(document.getElementById("addonMessage"));
+	}
+
+	while (allMessages.firstChild) 
+		messages.push(allMessages.removeChild(allMessages.firstChild));
 }
 
-function addonMessage(message) {
-	var allMessages		= document.getElementById("allMessages");
-	var addonMessage	= document.getElementById("addonMessage");
-	if(addonMessage)
-		allmessages.removeChild(addonMessage);
-	allMessages.appendChild(createHTMLElement(
-		"div",{
-			"id": "addonMessage",
-			"class": "messageBox"
-		},[
-			document.createTextNode(message)
-		]));
+function newAddonMessage(message) {
+	if(document.getElementById("addonMessage")) {
+		document.getElementById("addonMessage").childNodes[0].nodeValue = message;
+	} else {
+		addonMessage.childNodes[0].nodeValue = message;
+		document.getElementById("allMessages").appendChild(addonMessage);
+	}
+	resize();
 }
 
 function removeMessage(messageId) {
-    var allMessages	= document.getElementById("allMessages");
-	allMessages.removeChild(document.getElementById(messageId));
+	messages.push(document.getElementById("allMessages").removeChild(document.getElementById(messageId)));
 	if(document.getElementsByName("message").length < 1)
-		addonMessage("No new messages.");
+		newAddonMessage("No new messages.");
+	resize();
 }
 
 function loggedInState(loggedIn) {
@@ -70,24 +89,32 @@ function loggedInState(loggedIn) {
 	}
 }
 
+function resize() {
+	var allMessages	= document.getElementById("allMessages");
+
+	if (allMessages.offsetWidth == 0)	//Panel isn't being displayed. So the height returned is wrong.
+		return;
+		
+	var height = allMessages.offsetHeight + document.getElementById("navBar").offsetHeight;
+	if(height > 600)
+		height = 600;
+	self.port.emit("resize",height + 28);
+	
+}
+
 function createHTMLElement(tag, attributes, childNodes) {
 	var element = document.createElement(tag);
+	var i;
 	
-	if(attributes != undefined) {
-		for( var attribute in attributes) {
-			if(attributes.hasOwnProperty(attribute))
-				element.setAttribute(attribute,attributes[attribute]);
-		}
+	for(i in attributes) {
+		element.setAttribute(i,attributes[i]);
 	}
 	
 	if(childNodes != undefined) {
-		for(var node in childNodes) {
-			element.appendChild(childNodes[node]);
+		for(i in childNodes) {
+			element.appendChild(childNodes[i]);
 		}
 	}
 	
 	return element;
 }
-
-document.getElementsByName("updateLink")[0].onclick = function() {self.port.emit("Update");}
-document.getElementsByName("updateLink")[1].onclick = function() {self.port.emit("Update");}
